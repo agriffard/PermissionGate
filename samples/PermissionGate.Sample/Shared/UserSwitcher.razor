@@ -1,0 +1,31 @@
+@implements IDisposable
+@inject FakeAuthenticationStateProvider AuthProvider
+
+<div class="user-switcher">
+    <span class="user-switcher__label">Signed in as</span>
+    <div class="btn-group" role="group" aria-label="Switch sample user">
+        @foreach (var user in SampleUsers.All)
+        {
+            <button type="button"
+                    class="btn btn-sm @(IsActive(user) ? "btn-primary" : "btn-outline-secondary")"
+                    title="@user.Description"
+                    @onclick="() => SignIn(user)">
+                @user.Name
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+        => AuthProvider.AuthenticationStateChanged += OnChanged;
+
+    private bool IsActive(SampleUser user) => AuthProvider.Current == user;
+
+    private void SignIn(SampleUser user) => AuthProvider.SignInAs(user);
+
+    private void OnChanged(Task<AuthenticationState> _) => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+        => AuthProvider.AuthenticationStateChanged -= OnChanged;
+}

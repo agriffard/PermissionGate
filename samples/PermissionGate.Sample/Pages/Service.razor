@@ -1,0 +1,64 @@
+@page "/service"
+@implements IDisposable
+@inject IPermissionGate Gate
+@inject AuthenticationStateProvider AuthProvider
+
+<PageTitle>Service — PermissionGate</PageTitle>
+
+<h1>IPermissionGate service</h1>
+<p>
+    Imperative checks for <code>@@code</code> blocks. Results below are computed in
+    <code>OnParametersSetAsync</code> and refresh when you switch users.
+</p>
+
+<div class="demo">
+    <table class="table">
+        <thead>
+            <tr><th>Call</th><th>Result</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>await Gate.CanAsync("EditPosts")</code></td>
+                <td><Badge Value="_canEdit" /></td>
+            </tr>
+            <tr>
+                <td><code>await Gate.CanAllAsync(["ReadPosts", "EditPosts"])</code></td>
+                <td><Badge Value="_canReadAndEdit" /></td>
+            </tr>
+            <tr>
+                <td><code>await Gate.CanAnyAsync(["DeletePosts", "ManageUsers"])</code></td>
+                <td><Badge Value="_canDeleteOrManage" /></td>
+            </tr>
+            <tr>
+                <td><code>await Gate.IsInRoleAsync("Admin")</code></td>
+                <td><Badge Value="_isAdmin" /></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private bool _canEdit, _canReadAndEdit, _canDeleteOrManage, _isAdmin;
+
+    protected override void OnInitialized()
+        => AuthProvider.AuthenticationStateChanged += OnAuthChanged;
+
+    protected override async Task OnParametersSetAsync() => await RefreshAsync();
+
+    private async Task RefreshAsync()
+    {
+        _canEdit = await Gate.CanAsync("EditPosts");
+        _canReadAndEdit = await Gate.CanAllAsync(new[] { "ReadPosts", "EditPosts" });
+        _canDeleteOrManage = await Gate.CanAnyAsync(new[] { "DeletePosts", "ManageUsers" });
+        _isAdmin = await Gate.IsInRoleAsync("Admin");
+    }
+
+    private async void OnAuthChanged(Task<AuthenticationState> _)
+    {
+        await RefreshAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+        => AuthProvider.AuthenticationStateChanged -= OnAuthChanged;
+}

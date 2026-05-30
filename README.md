@@ -9,6 +9,22 @@ Declarative authorization components and an imperative service for ASP.NET Core 
 
 ---
 
+## Live demo
+
+An interactive Blazor WebAssembly demo lives in [`samples/PermissionGate.Sample`](samples/PermissionGate.Sample)
+and is published to GitHub Pages:
+
+**https://agriffard.github.io/PermissionGate/**
+
+Switch between sample users (Guest / Viewer / Editor / Admin) and watch `<Can>`, `<Cannot>`,
+and `IPermissionGate` react live. Run it locally with:
+
+```bash
+dotnet run --project samples/PermissionGate.Sample
+```
+
+---
+
 ## Installation
 
 ```bash

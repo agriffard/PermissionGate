@@ -1,0 +1,6 @@
+<span class="badge @(Value ? "bg-success" : "bg-secondary")">@(Value ? "true" : "false")</span>
+
+@code {
+    /// <summary>The boolean result to render as a colored badge.</summary>
+    [Parameter] public bool Value { get; set; }
+}

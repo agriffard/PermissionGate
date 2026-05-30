@@ -1,0 +1,107 @@
+@page "/components"
+
+<PageTitle>Components — PermissionGate</PageTitle>
+
+<h1>&lt;Can&gt; / &lt;Cannot&gt; components</h1>
+<p>Switch the active user (top right) to watch each gate react.</p>
+
+<div class="demo">
+    <h2>Single policy</h2>
+    <p class="demo__src"><code>&lt;Can Policy="EditPosts"&gt; … &lt;/Can&gt;</code></p>
+    <div class="demo__out">
+        <Can Policy="EditPosts">
+            <button class="btn btn-primary">Edit post</button>
+        </Can>
+        <Cannot Policy="EditPosts">
+            <span class="text-muted">You cannot edit posts.</span>
+        </Cannot>
+    </div>
+</div>
+
+<div class="demo">
+    <h2>Policy with an <code>Else</code> branch</h2>
+    <p class="demo__src"><code>&lt;Can Policy="DeletePosts"&gt; … &lt;Else&gt; … &lt;/Else&gt; &lt;/Can&gt;</code></p>
+    <div class="demo__out">
+        <Can Policy="DeletePosts">
+            <ChildContent>
+                <button class="btn btn-danger">Delete post</button>
+            </ChildContent>
+            <Else>
+                <span class="text-muted">Delete is disabled (needs <code>posts.delete</code>).</span>
+            </Else>
+        </Can>
+    </div>
+</div>
+
+<div class="demo">
+    <h2>Roles — any matching role passes</h2>
+    <p class="demo__src"><code>&lt;Can Roles="Admin, Editor"&gt; … &lt;/Can&gt;</code></p>
+    <div class="demo__out">
+        <Can Roles="Admin, Editor">
+            <ChildContent>
+                <NavLink class="btn btn-secondary" href="components">Open editor tools</NavLink>
+            </ChildContent>
+            <Else>
+                <span class="text-muted">Requires the Admin or Editor role.</span>
+            </Else>
+        </Can>
+    </div>
+</div>
+
+<div class="demo">
+    <h2>Multiple policies — <code>GateMode.All</code> (default)</h2>
+    <p class="demo__src"><code>&lt;Can Policies="@(new[]{"ReadPosts","EditPosts"})" Mode="GateMode.All"&gt;</code></p>
+    <div class="demo__out">
+        <Can Policies="@(new[] { "ReadPosts", "EditPosts" })" Mode="GateMode.All">
+            <ChildContent>
+                <span class="badge bg-success">Can read AND edit</span>
+            </ChildContent>
+            <Else>
+                <span class="text-muted">Needs both <code>ReadPosts</code> and <code>EditPosts</code>.</span>
+            </Else>
+        </Can>
+    </div>
+</div>
+
+<div class="demo">
+    <h2>Multiple policies — <code>GateMode.Any</code></h2>
+    <p class="demo__src"><code>&lt;Can Policies="@(new[]{"DeletePosts","ManageUsers"})" Mode="GateMode.Any"&gt;</code></p>
+    <div class="demo__out">
+        <Can Policies="@(new[] { "DeletePosts", "ManageUsers" })" Mode="GateMode.Any">
+            <ChildContent>
+                <span class="badge bg-warning text-dark">Can delete OR manage users</span>
+            </ChildContent>
+            <Else>
+                <span class="text-muted">Needs <code>DeletePosts</code> or <code>ManageUsers</code>.</span>
+            </Else>
+        </Can>
+    </div>
+</div>
+
+<div class="demo">
+    <h2>Access the authentication state via <code>@@context</code></h2>
+    <p class="demo__src"><code>&lt;Can Policy="ReadPosts"&gt;Hello, @@context.User.Identity?.Name&lt;/Can&gt;</code></p>
+    <div class="demo__out">
+        <Can Policy="ReadPosts">
+            <ChildContent Context="auth">
+                Hello, <strong>@auth.User.Identity?.Name</strong>! You can read posts.
+            </ChildContent>
+            <Else>
+                <span class="text-muted">Sign in as a user with <code>posts.read</code>.</span>
+            </Else>
+        </Can>
+    </div>
+</div>
+
+<div class="demo">
+    <h2><code>&lt;Cannot&gt;</code> — render when denied</h2>
+    <p class="demo__src"><code>&lt;Cannot Policy="ManageUsers"&gt; … &lt;/Cannot&gt;</code></p>
+    <div class="demo__out">
+        <Cannot Policy="ManageUsers">
+            <span class="text-muted">You do not have permission to manage users.</span>
+        </Cannot>
+        <Can Policy="ManageUsers">
+            <span class="badge bg-success">User management unlocked</span>
+        </Can>
+    </div>
+</div>
