@@ -1,0 +1,10 @@
+@inherits GateComponentBase
+
+@if (IsAuthorizing)
+{
+    @Authorizing
+}
+else if (!IsAuthorized)
+{
+    @ChildContent?.Invoke(CurrentAuthState!)
+}
