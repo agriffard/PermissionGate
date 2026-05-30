@@ -1,7 +1,57 @@
-﻿@page "/"
+@page "/"
+@implements IDisposable
+@inject FakeAuthenticationStateProvider AuthProvider
 
-<PageTitle>Home</PageTitle>
+<PageTitle>PermissionGate — Demo</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Hello, @AuthProvider.Current.Name!</h1>
 
-Welcome to your new app.
+<p class="lead">
+    Declarative authorization components (<code>&lt;Can&gt;</code> / <code>&lt;Cannot&gt;</code>)
+    and an imperative <code>IPermissionGate</code> service for Blazor, built on
+    <code>IAuthorizationService</code>.
+</p>
+
+<div class="alert alert-warning" role="alert">
+    <strong>UI only.</strong> These components control what users <em>see</em>, not what they
+    can <em>do</em>. Always enforce authorization on the server too.
+</div>
+
+<h2>Try it</h2>
+<p>
+    Use the <strong>Signed in as</strong> switcher (top right) to impersonate a sample user.
+    The greeting above and the gated content on the <a href="components">Components</a> and
+    <a href="service">Service</a> pages update live.
+</p>
+
+<h3>Sample users</h3>
+<table class="table">
+    <thead>
+        <tr><th>User</th><th>Roles</th><th>Permissions</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Guest</td><td><em>none</em></td><td><em>none</em></td></tr>
+        <tr><td>Viewer</td><td>Viewer</td><td>posts.read, reports.view</td></tr>
+        <tr><td>Editor</td><td>Editor</td><td>posts.read, posts.write, reports.view</td></tr>
+        <tr><td>Admin</td><td>Admin, Editor, Viewer</td><td>posts.read, posts.write, posts.delete, reports.view, users.manage</td></tr>
+    </tbody>
+</table>
+
+<h3>Policies registered in this demo</h3>
+<ul>
+    <li><code>ReadPosts</code> → requires <code>posts.read</code></li>
+    <li><code>EditPosts</code> → requires <code>posts.write</code></li>
+    <li><code>DeletePosts</code> → requires <code>posts.delete</code></li>
+    <li><code>ViewReports</code> → requires <code>reports.view</code></li>
+    <li><code>ManageUsers</code> → requires <code>users.manage</code></li>
+</ul>
+
+@code {
+    protected override void OnInitialized()
+        => AuthProvider.AuthenticationStateChanged += OnAuthChanged;
+
+    private void OnAuthChanged(Task<AuthenticationState> _) => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+        => AuthProvider.AuthenticationStateChanged -= OnAuthChanged;
+}
