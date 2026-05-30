@@ -1,0 +1,22 @@
+@inherits GateComponentBase
+
+@if (IsAuthorizing)
+{
+    @Authorizing
+}
+else if (IsAuthorized)
+{
+    @ChildContent?.Invoke(CurrentAuthState!)
+}
+else
+{
+    @Else
+}
+
+@code {
+    /// <summary>
+    /// Content rendered when the authorization check <em>fails</em>.
+    /// Convenience alternative to pairing <c>&lt;Can&gt;</c> with a sibling <c>&lt;Cannot&gt;</c>.
+    /// </summary>
+    [Parameter] public RenderFragment? Else { get; set; }
+}

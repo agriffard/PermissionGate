@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PermissionGate/PermissionGate.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PermissionGate.Tests/PermissionGate.Tests.csproj" />
+  </Folder>
+</Solution>
