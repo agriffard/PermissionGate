@@ -1,5 +1,7 @@
 # PermissionGate
 
+[![NuGet](https://img.shields.io/nuget/v/PermissionGate.svg)](https://www.nuget.org/packages/PermissionGate)
+
 Declarative authorization components and an imperative service for ASP.NET Core Blazor, built on top of `IAuthorizationService`.
 
 > ⚠️ **Security notice — UI only**
