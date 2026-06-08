@@ -139,6 +139,66 @@ public class PermissionGateServiceTests
         result.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task CanAllAsync_Returns_True_For_Empty_Policy_List()
+    {
+        var result = await _gate.CanAllAsync([]);
+
+        result.Should().BeTrue();
+        await _authService.DidNotReceive()
+            .AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object?>(), Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task CanAnyAsync_Returns_False_For_Empty_Policy_List()
+    {
+        var result = await _gate.CanAnyAsync([]);
+
+        result.Should().BeFalse();
+        await _authService.DidNotReceive()
+            .AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object?>(), Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task CanAllAsync_Forwards_Resource_To_AuthorizationService()
+    {
+        var resource = new { Id = 5 };
+        _authService
+            .AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object?>(), Arg.Any<string>())
+            .Returns(Task.FromResult(AuthorizationResult.Success()));
+
+        await _gate.CanAllAsync(["Read", "Write"], resource);
+
+        await _authService.Received(1).AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), resource, "Read");
+        await _authService.Received(1).AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), resource, "Write");
+    }
+
+    [Fact]
+    public async Task CanAllAsync_Short_Circuits_On_First_Failure()
+    {
+        _authService
+            .AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object?>(), Arg.Any<string>())
+            .Returns(Task.FromResult(AuthorizationResult.Failed()));
+
+        await _gate.CanAllAsync(["Read", "Write"]);
+
+        await _authService.Received(1).AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object?>(), "Read");
+        await _authService.DidNotReceive().AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object?>(), "Write");
+    }
+
+    [Fact]
+    public async Task CanAnyAsync_Short_Circuits_On_First_Success()
+    {
+        _authService
+            .AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object?>(), Arg.Any<string>())
+            .Returns(Task.FromResult(AuthorizationResult.Success()));
+
+        await _gate.CanAnyAsync(["Manage", "Approve"]);
+
+        await _authService.Received(1).AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object?>(), "Manage");
+        await _authService.DidNotReceive().AuthorizeAsync(Arg.Any<ClaimsPrincipal>(), Arg.Any<object?>(), "Approve");
+    }
+
     // ──────────────────────────────────────────────
     // IsInRoleAsync
     // ──────────────────────────────────────────────
